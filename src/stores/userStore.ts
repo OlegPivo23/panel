@@ -2,25 +2,7 @@ import { AxiosError } from 'axios';
 import { defineStore } from 'pinia';
 import axiosR from 'src/api/http';
 import cookie from 'cookiejs';
-
-interface User {
-  id?: number;
-  email: string;
-  password: string;
-}
-
-interface ErrorType {
-  message: string;
-  statusCode?: number;
-}
-
-interface State {
-  user: User | null;
-  token: string | null;
-  error: ErrorType | null;
-  successRes: boolean;
-  isAuthenticated: boolean;
-}
+import { User, ErrorType, State } from '../interfaces/userInterfaces';
 
 export const useUserStore = defineStore('userStore', {
   state: (): State => ({

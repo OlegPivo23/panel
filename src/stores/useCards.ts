@@ -1,12 +1,6 @@
 import { defineStore } from 'pinia';
 import axiosR from 'src/api/http';
-
-interface Card {
-  id?: number;
-  name: string;
-  second_name: string;
-  year: number;
-}
+import Card from 'src/interfaces/card';
 
 export const useCardStore = defineStore('cardStore', {
   state: () => ({
