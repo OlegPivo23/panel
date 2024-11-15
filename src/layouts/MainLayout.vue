@@ -1,106 +1,114 @@
 <template>
-  <q-layout view="lHh Lpr lFf">
-    <q-header elevated>
-      <q-toolbar>
+  <div class="q-pa-md max-w-7xl mx-auto">
+    <q-layout view="hHh Lpr lFf">
+      <q-header elevated class="header">
+        <q-toolbar>
+          <q-btn
+            v-if="isAuthenticated"
+            @click="toggleSidebar"
+            icon="menu"
+            flat
+          />
+          <q-toolbar-title> My App </q-toolbar-title>
+        </q-toolbar>
         <q-btn
+          class="items-end"
+          v-if="isAuthenticated"
+          @click="handleExit"
+          label="выход"
           flat
-          dense
-          round
-          icon="menu"
-          aria-label="Menu"
-          @click="toggleLeftDrawer"
         />
+      </q-header>
 
-        <q-toolbar-title>
-          Quasar App
-        </q-toolbar-title>
+      <q-drawer side="left" overlay v-model="isSidebarVisible">
+        <div ref="sideBar" class="sidebar bg-indigo-8">
+          <div class="q-pa-md q-gutter-sm">
+            <q-btn
+              to="/cabinet"
+              class="btn"
+              color="indigo-8"
+              text-color="white"
+              label="Личный кабинет"
+            />
+            <q-btn
+              to="/create"
+              class="btn"
+              color="indigo-8"
+              text-color="white"
+              label="Создать пользователя"
+            />
+            <q-btn
+              to="/users"
+              class="btn"
+              color="indigo-8"
+              text-color="white"
+              label="Пользователи"
+            />
+            <q-btn
+              to="/tasks"
+              class="btn"
+              color="indigo-8"
+              text-color="white"
+              label="Задачи"
+            />
+          </div>
+        </div>
+      </q-drawer>
 
-        <div>Quasar v{{ $q.version }}</div>
-      </q-toolbar>
-    </q-header>
-
-    <q-drawer
-      v-model="leftDrawerOpen"
-      show-if-above
-      bordered
-    >
-      <q-list>
-        <q-item-label
-          header
-        >
-          Essential Links
-        </q-item-label>
-
-        <EssentialLink
-          v-for="link in linksList"
-          :key="link.title"
-          v-bind="link"
-        />
-      </q-list>
-    </q-drawer>
-
-    <q-page-container>
-      <router-view />
-    </q-page-container>
-  </q-layout>
+      <q-page-container>
+        <RouterView></RouterView>
+      </q-page-container>
+    </q-layout>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import EssentialLink, { EssentialLinkProps } from 'components/EssentialLink.vue';
+import { computed, onMounted, ref } from 'vue';
+import { onClickOutside } from '@vueuse/core';
+import { useRouter } from 'vue-router';
+import { useUserStore } from 'src/stores/userStore';
+import cookie from 'cookiejs';
 
-defineOptions({
-  name: 'MainLayout'
+const userStore = useUserStore();
+const router = useRouter();
+const isSidebarVisible = ref<boolean>(false);
+const sideBar = ref<HTMLElement | null>(null);
+
+const isAuthenticated = computed(() => userStore.isAuthenticated);
+
+function toggleSidebar() {
+  isSidebarVisible.value = !isSidebarVisible.value;
+}
+
+function handleExit() {
+  cookie.remove('token');
+  userStore.token = '';
+  userStore.user = null;
+  router.push('/');
+}
+
+onClickOutside(sideBar, () => {
+  isSidebarVisible.value = false;
 });
 
-const linksList: EssentialLinkProps[] = [
-  {
-    title: 'Docs',
-    caption: 'quasar.dev',
-    icon: 'school',
-    link: 'https://quasar.dev'
-  },
-  {
-    title: 'Github',
-    caption: 'github.com/quasarframework',
-    icon: 'code',
-    link: 'https://github.com/quasarframework'
-  },
-  {
-    title: 'Discord Chat Channel',
-    caption: 'chat.quasar.dev',
-    icon: 'chat',
-    link: 'https://chat.quasar.dev'
-  },
-  {
-    title: 'Forum',
-    caption: 'forum.quasar.dev',
-    icon: 'record_voice_over',
-    link: 'https://forum.quasar.dev'
-  },
-  {
-    title: 'Twitter',
-    caption: '@quasarframework',
-    icon: 'rss_feed',
-    link: 'https://twitter.quasar.dev'
-  },
-  {
-    title: 'Facebook',
-    caption: '@QuasarFramework',
-    icon: 'public',
-    link: 'https://facebook.quasar.dev'
-  },
-  {
-    title: 'Quasar Awesome',
-    caption: 'Community Quasar projects',
-    icon: 'favorite',
-    link: 'https://awesome.quasar.dev'
-  }
-];
-
-const leftDrawerOpen = ref(false);
-
-function toggleLeftDrawer () {
-  leftDrawerOpen.value = !leftDrawerOpen.value;
-}
+onMounted(() => {
+  userStore.autoLogin();
+});
 </script>
+
+<style scoped>
+.header {
+  display: flex;
+  justify-content: space-between;
+}
+.sidebar {
+  height: 100vh;
+}
+.btn {
+  width: 100%;
+}
+.btn-exit {
+  display: flex;
+  justify-content: flex-end;
+}
+</style>
