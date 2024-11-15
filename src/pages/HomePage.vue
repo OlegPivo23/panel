@@ -35,7 +35,7 @@
       </div>
 
       <div class="flex flex-center">
-        <q-btn @click="login">отправить</q-btn>
+        <q-btn @click="login" :disabled="!isFormField">отправить</q-btn>
       </div>
 
       <q-linear-progress
@@ -74,7 +74,7 @@ const user = computed(() => userStore.getUser);
 const getError = computed(() => userStore.getError);
 
 watch(
-  [() => user.value, () => loginForm.email, () => loginForm.password],
+  [() => loginForm.email, () => loginForm.password],
   ([newEmail, newPassword]) => {
     isFormField.value = !!newEmail && !!newPassword;
   }
@@ -89,7 +89,7 @@ async function login() {
     password: loginForm.password,
   });
 
-  isLoading.value = false; // Reset loading state
+  isLoading.value = false;
 
   if (user.value) {
     router.push({ path: '/create' });
